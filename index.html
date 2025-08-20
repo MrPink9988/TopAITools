@@ -1,1 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Top AI Tool — Discover the Best AI Tools</title>
+  <meta name="description" content="Top AI Tool — a minimal, fast directory of AI tools with search and filters." />
+  <style>
+    :root{
+      --bg:#0b0c10; /* deep charcoal */
+      --panel:#11131a; /* card background */
+      --muted:#a6adbb; /* secondary text */
+      --text:#e9edf5; /* main text */
+      --brand:#1fc900; /* user's preferred green for links */
+      --chip:#1a1f2b; /* filter chip bg */
+      --border:#222636;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:18px; /* rounded corners preference */
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial; 
+      background:linear-gradient(180deg, #0b0c10 0%, #0f1220 100%);
+      color:var(--text);
+    }
+    a{color:var(--brand); text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* Layout */
+    header{
+      position:sticky; top:0; z-index:5;
+      backdrop-filter:saturate(140%) blur(10px);
+      background:rgba(11,12,16,.75);
+      border-bottom:1px solid var(--border);
+    }
+    .nav{display:flex; align-items:center; gap:16px; max-width:1200px; margin:0 auto; padding:14px 16px}
+    .logo{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px}
+    .logo-badge{width:36px; height:36px; border-radius:10px; display:grid; place-items:center; background:var(--brand); color:#071a07; font-weight:900}
+    .tagline{color:var(--muted); font-size:.92rem}
+    .nav-right{margin-left:auto; display:flex; align-items:center; gap:10px}
+
+    .wrap{max-width:1200px; margin:24px auto; padding:0 16px}
+
+    .controls{display:grid; grid-template-columns: 1.1fr .9fr; gap:16px; margin:8px 0 18px}
+    .search{display:flex; align-items:center; gap:10px; background:var(--panel); border:1px solid var(--border); padding:10px 12px; border-radius:var(--radius); box-shadow:var(--shadow)}
+    .search input{flex:1; background:transparent; border:0; outline:0; color:var(--text); font-size:1rem}
+
+    .filterbar{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+    .chip{display:inline-flex; align-items:center; gap:8px; background:var(--chip); border:1px solid var(--border); padding:8px 10px; border-radius:999px; cursor:pointer; user-select:none}
+    .chip input{accent-color:var(--brand)}
+
+    .toolbar{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:6px 0 2px}
+    select, .btn{background:var(--panel); color:var(--text); border:1px solid var(--border); border-radius:12px; padding:10px 12px}
+    .btn{cursor:pointer}
+
+    .grid{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:16px}
+    @media (max-width:1000px){ .grid{grid-template-columns: repeat(2, minmax(0,1fr));} .controls{grid-template-columns: 1fr} }
+    @media (max-width:640px){ .grid{grid-template-columns: 1fr} }
+
+    .card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px; display:flex; flex-direction:column; gap:12px; box-shadow:var(--shadow)}
+    .card h3{margin:0; font-size:1.05rem}
+    .meta{display:flex; gap:8px; align-items:center; flex-wrap:wrap; color:var(--muted); font-size:.9rem}
+    .tags{display:flex; gap:6px; flex-wrap:wrap}
+    .tag{font-size:.75rem; padding:4px 8px; border-radius:999px; background:#0f1625; border:1px solid var(--border); color:#c9d2e3}
+    .card .actions{margin-top:auto; display:flex; gap:8px}
+    .pill{display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid var(--border); border-radius:12px; background:#0f1625}
+    .pill.primary{background:var(--brand); border-color:transparent; color:#041404; font-weight:700}
+    .pill:hover{filter:brightness(1.04)}
+
+    .count{color:var(--muted); font-size:.95rem; margin:8px 0 18px}
+    footer{border-top:1px solid var(--border); margin-top:32px; padding:24px 16px; color:var(--muted)}
+    code.inline{background:#0f1625; border:1px solid var(--border); padding:2px 6px; border-radius:8px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="logo">
+        <div class="logo-badge">AI</div>
+        <div>
+          <div>Top AI Tool</div>
+          <div class="tagline">Discover, filter, and compare AI tools</div>
+        </div>
+      </div>
+      <div class="nav-right">
+        <a href="#" id="show-faves">★ Favorites</a>
+        <a href="https://" target="_blank" rel="noopener">Submit a tool</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="controls">
+      <div class="search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 21l-4.35-4.35" stroke="#8aa0b7" stroke-width="1.5" stroke-linecap="round"/><circle cx="11" cy="11" r="7" stroke="#8aa0b7" stroke-width="1.5" fill="none"/></svg>
+        <input id="q" placeholder="Search tools by name, description, or tags… (e.g. resume, image, agent)" autocomplete="off" />
+      </div>
+      <div class="toolbar">
+        <select id="sort">
+          <option value="pop-desc">Sort: Popularity ↓</option>
+          <option value="name-asc">Name A→Z</option>
+          <option value="name-desc">Name Z→A</option>
+        </select>
+        <select id="pricing">
+          <option value="any">Pricing: Any</option>
+          <option value="free">Free / Free tier</option>
+          <option value="paid">Paid</option>
+        </select>
+        <button class="btn" id="clear">Clear filters</button>
+      </div>
+    </section>
+
+    <section class="filterbar" id="category-chips">
+      <!-- Category chips injected by JS -->
+    </section>
+
+    <div class="count" id="count">Loading…</div>
+
+    <section class="grid" id="grid">
+      <!-- Cards injected by JS -->
+    </section>
+
+    <footer>
+      <small>
+        Tip: Press <code class="inline">/</code> to focus search. Your favorites are saved locally. Add more tools by editing the <code class="inline">seedData</code> array in this file.
+      </small>
+    </footer>
+  </main>
+
+  <script>
+    // --- Minimal data model ---
+    /**
+     * name: string
+     * url: string
+     * category: string (one of categories)
+     * short: string
+     * pricing: 'free' | 'paid' | 'both'
+     * tags: string[] (e.g. ['image','no-code'])
+     * popularity: number (rough rank proxy 1..100)
+     */
+
+    const seedData = [
+      // === 1) General AI Assistants & AI Search ===
+      {name:'ChatGPT', url:'https://chat.openai.com', category:'General Assistants & AI Search', short:'Conversational assistant & GPTs.', pricing:'both', tags:['assistant','chat','gpt'], popularity:100},
+      {name:'Claude', url:'https://claude.ai', category:'General Assistants & AI Search', short:'Helpful, harmless, honest assistant.', pricing:'both', tags:['assistant','chat'], popularity:96},
+      {name:'Gemini', url:'https://gemini.google.com', category:'General Assistants & AI Search', short:'Google’s multimodal assistant.', pricing:'both', tags:['assistant','search'], popularity:93},
+      {name:'Microsoft Copilot', url:'https://copilot.microsoft.com', category:'General Assistants & AI Search', short:'Assistant integrated with Microsoft products.', pricing:'both', tags:['assistant','productivity'], popularity:92},
+      {name:'Perplexity', url:'https://www.perplexity.ai', category:'General Assistants & AI Search', short:'Answer engine with citations.', pricing:'both', tags:['search','answers'], popularity:90},
+
+      // === 2) AI Website Builders ===
+      {name:'Wix (AI)', url:'https://www.wix.com', category:'AI Website Builders', short:'AI-assisted website creation.', pricing:'paid', tags:['web','site-builder','no-code'], popularity:85},
+      {name:'Squarespace (AI)', url:'https://www.squarespace.com', category:'AI Website Builders', short:'Design-led site builder with AI features.', pricing:'paid', tags:['web','design','no-code'], popularity:79},
+      {name:'Hostinger AI Website Builder', url:'https://www.hostinger.com/website-builder', category:'AI Website Builders', short:'Fast, templated AI builder.', pricing:'paid', tags:['web','builder'], popularity:70},
+      {name:'GoDaddy AI', url:'https://www.godaddy.com', category:'AI Website Builders', short:'Builder + marketing AI.', pricing:'paid', tags:['web','marketing'], popularity:62},
+      {name:'Shopify Magic', url:'https://www.shopify.com', category:'AI Website Builders', short:'AI for e‑commerce content & setup.', pricing:'paid', tags:['ecommerce','builder'], popularity:72},
+
+      // === 3) Image Generators ===
+      {name:'Midjourney', url:'https://www.midjourney.com', category:'Image Generators', short:'High‑quality creative image generation.', pricing:'paid', tags:['image','art'], popularity:95},
+      {name:'DALL·E', url:'https://openai.com/dall-e', category:'Image Generators', short:'Image generation by OpenAI.', pricing:'paid', tags:['image','illustration'], popularity:90},
+      {name:'Stable Diffusion', url:'https://stability.ai', category:'Image Generators', short:'Open models & local workflows.', pricing:'free', tags:['image','open-source'], popularity:88},
+      {name:'Leonardo AI', url:'https://leonardo.ai', category:'Image Generators', short:'Models, styles & asset generation.', pricing:'both', tags:['image','assets'], popularity:75},
+      {name:'Ideogram', url:'https://ideogram.ai', category:'Image Generators', short:'Text-within-image friendly.', pricing:'both', tags:['image','typography'], popularity:68},
+
+      // === 4) Video Generators ===
+      {name:'Runway', url:'https://runwayml.com', category:'Video Generators', short:'Gen‑video & creative suite.', pricing:'paid', tags:['video','editor'], popularity:86},
+      {name:'Pika', url:'https://pika.art', category:'Video Generators', short:'Text‑to‑video & editing.', pricing:'both', tags:['video','animation'], popularity:74},
+      {name:'Synthesia', url:'https://www.synthesia.io', category:'Video Generators', short:'AI avatars & video creation.', pricing:'paid', tags:['video','avatar'], popularity:72},
+      {name:'Sora', url:'https://openai.com/sora', category:'Video Generators', short:'Advanced text‑to‑video (limited).', pricing:'paid', tags:['video','research'], popularity:80},
+      {name:'Kapwing AI', url:'https://www.kapwing.com/ai', category:'Video Generators', short:'Online editor with AI features.', pricing:'both', tags:['video','editor'], popularity:60},
+
+      // === 5) Voice, Speech & Dubbing ===
+      {name:'ElevenLabs', url:'https://elevenlabs.io', category:'Voice, Speech & Dubbing', short:'Voice cloning & TTS.', pricing:'both', tags:['audio','tts'], popularity:84},
+      {name:'Play.ht', url:'https://play.ht', category:'Voice, Speech & Dubbing', short:'TTS with many voices.', pricing:'paid', tags:['audio','tts'], popularity:63},
+      {name:'Descript', url:'https://www.descript.com', category:'Voice, Speech & Dubbing', short:'Editing + Overdub voices.', pricing:'both', tags:['audio','editing'], popularity:70},
+      {name:'Coqui', url:'https://coqui.ai', category:'Voice, Speech & Dubbing', short:'Voice tech & dubbing.', pricing:'both', tags:['audio','tts'], popularity:55},
+      {name:'Resemble AI', url:'https://www.resemble.ai', category:'Voice, Speech & Dubbing', short:'Custom voices & cloning.', pricing:'paid', tags:['audio','tts'], popularity:57},
+
+      // === 6) Music & Audio Creation ===
+      {name:'Suno', url:'https://suno.com', category:'Music & Audio Creation', short:'Text‑to‑music creation.', pricing:'both', tags:['music','song'], popularity:82},
+      {name:'Udio', url:'https://www.udio.com', category:'Music & Audio Creation', short:'AI music for creators.', pricing:'both', tags:['music','creator'], popularity:78},
+      {name:'AIVA', url:'https://www.aiva.ai', category:'Music & Audio Creation', short:'Compose soundtracks with AI.', pricing:'both', tags:['music','composer'], popularity:56},
+      {name:'Beatoven.ai', url:'https://www.beatoven.ai', category:'Music & Audio Creation', short:'Royalty‑free AI music.', pricing:'paid', tags:['music','royalty-free'], popularity:52},
+      {name:'Soundraw', url:'https://soundraw.io', category:'Music & Audio Creation', short:'Generate custom tracks.', pricing:'paid', tags:['music','generator'], popularity:51},
+
+      // === 7) Resume/CV & Job Materials ===
+      {name:'Rezi', url:'https://www.rezi.ai', category:'Resume/CV & Job Materials', short:'ATS‑optimized resumes.', pricing:'both', tags:['resume','cv'], popularity:66},
+      {name:'Resume.io', url:'https://resume.io', category:'Resume/CV & Job Materials', short:'Templates with AI assist.', pricing:'both', tags:['resume','templates'], popularity:64},
+      {name:'Teal', url:'https://www.tealhq.com', category:'Resume/CV & Job Materials', short:'Job tracker + resume AI.', pricing:'both', tags:['job','resume'], popularity:58},
+      {name:'Kickresume', url:'https://www.kickresume.com', category:'Resume/CV & Job Materials', short:'CV builder & cover letters.', pricing:'both', tags:['cv','cover-letter'], popularity:54},
+      {name:'Enhancv', url:'https://enhancv.com', category:'Resume/CV & Job Materials', short:'CV builder with scoring.', pricing:'paid', tags:['resume','builder'], popularity:50},
+
+      // === 8) Document & PDF AI ===
+      {name:'Adobe Acrobat AI Assistant', url:'https://www.adobe.com/acrobat/ai.html', category:'Document & PDF AI', short:'Ask PDFs, summarize, draft.', pricing:'paid', tags:['pdf','docs'], popularity:65},
+      {name:'ChatPDF', url:'https://www.chatpdf.com', category:'Document & PDF AI', short:'Chat with PDFs.', pricing:'both', tags:['pdf','chat'], popularity:60},
+      {name:'AskYourPDF', url:'https://askyourpdf.com', category:'Document & PDF AI', short:'Query long PDFs.', pricing:'both', tags:['pdf','research'], popularity:59},
+      {name:'Humata', url:'https://www.humata.ai', category:'Document & PDF AI', short:'Research assistant for files.', pricing:'both', tags:['pdf','research'], popularity:55},
+      {name:'Documind', url:'https://www.documind.app', category:'Document & PDF AI', short:'Analyze & summarize docs.', pricing:'both', tags:['pdf','summarize'], popularity:48},
+
+      // === 9) Meeting Notes & Transcription ===
+      {name:'Otter.ai', url:'https://otter.ai', category:'Meeting Notes & Transcription', short:'Live notes & transcripts.', pricing:'both', tags:['notes','transcription'], popularity:73},
+      {name:'Fireflies.ai', url:'https://fireflies.ai', category:'Meeting Notes & Transcription', short:'Meeting recording & AI notes.', pricing:'both', tags:['meetings','notes'], popularity:62},
+      {name:'tl;dv', url:'https://tldv.io', category:'Meeting Notes & Transcription', short:'Zoom/Meet summaries.', pricing:'both', tags:['notes','summary'], popularity:54},
+      {name:'Fathom', url:'https://fathom.video', category:'Meeting Notes & Transcription', short:'Meeting highlights free.', pricing:'free', tags:['notes','meetings'], popularity:50},
+      {name:'Zoom AI Companion', url:'https://explore.zoom.us', category:'Meeting Notes & Transcription', short:'Built‑in Zoom assistant.', pricing:'paid', tags:['zoom','notes'], popularity:58},
+
+      // === 10) Presentations & Decks ===
+      {name:'Gamma', url:'https://gamma.app', category:'Presentations & Decks', short:'Decks & docs in minutes.', pricing:'both', tags:['slides','docs'], popularity:68},
+      {name:'Tome', url:'https://tome.app', category:'Presentations & Decks', short:'Narrative decks with AI.', pricing:'both', tags:['slides','story'], popularity:61},
+      {name:'Canva (Magic Design)', url:'https://www.canva.com', category:'Presentations & Decks', short:'Design & slides with AI.', pricing:'both', tags:['design','slides'], popularity:77},
+      {name:'Pitch (AI)', url:'https://pitch.com', category:'Presentations & Decks', short:'Team slides + AI assist.', pricing:'both', tags:['slides','team'], popularity:57},
+      {name:'Beautiful.ai', url:'https://www.beautiful.ai', category:'Presentations & Decks', short:'Auto‑layout presentation builder.', pricing:'paid', tags:['slides','layout'], popularity:56},
+
+      // === 11) Coding Assistants ===
+      {name:'GitHub Copilot', url:'https://github.com/features/copilot', category:'Coding Assistants', short:'Code suggestions in your IDE.', pricing:'paid', tags:['code','developer'], popularity:88},
+      {name:'Codeium', url:'https://codeium.com', category:'Coding Assistants', short:'Free coding AI for teams.', pricing:'both', tags:['code','autocomplete'], popularity:63},
+      {name:'Replit AI', url:'https://replit.com', category:'Coding Assistants', short:'IDE + Ghostwriter.', pricing:'both', tags:['code','ide'], popularity:60},
+      {name:'Sourcegraph Cody', url:'https://sourcegraph.com/cody', category:'Coding Assistants', short:'Codebase Q&A + gen.', pricing:'both', tags:['code','context'], popularity:58},
+      {name:'Tabnine', url:'https://www.tabnine.com', category:'Coding Assistants', short:'Private code models.', pricing:'paid', tags:['code','privacy'], popularity:55},
+
+      // === 12) Spreadsheets, Data & Analytics ===
+      {name:'Rows (AI)', url:'https://rows.com', category:'Spreadsheets, Data & Analytics', short:'Spreadsheet with AI.', pricing:'both', tags:['data','sheets'], popularity:50},
+      {name:'Airtable (AI)', url:'https://airtable.com', category:'Spreadsheets, Data & Analytics', short:'Bases + AI Q&A.', pricing:'paid', tags:['data','no-code'], popularity:60},
+      {name:'Notion AI', url:'https://www.notion.so/product/ai', category:'Spreadsheets, Data & Analytics', short:'Workspace + Q&A.', pricing:'paid', tags:['notes','qna'], popularity:76},
+      {name:'Polymer', url:'https://www.polymersearch.com', category:'Spreadsheets, Data & Analytics', short:'No‑code data explorer.', pricing:'paid', tags:['data','no-code'], popularity:46},
+      {name:'Obviously AI', url:'https://www.obviously.ai', category:'Spreadsheets, Data & Analytics', short:'Predictive analytics no‑code.', pricing:'paid', tags:['ml','no-code'], popularity:44},
+
+      // === 13) SEO & Content Marketing ===
+      {name:'Jasper', url:'https://www.jasper.ai', category:'SEO & Content Marketing', short:'Brand voice & content.', pricing:'paid', tags:['marketing','copy'], popularity:66},
+      {name:'Copy.ai', url:'https://www.copy.ai', category:'SEO & Content Marketing', short:'Campaigns & copy wizard.', pricing:'both', tags:['copy','workflow'], popularity:59},
+      {name:'Surfer AI', url:'https://surferseo.com', category:'SEO & Content Marketing', short:'SEO‑optimized articles.', pricing:'paid', tags:['seo','content'], popularity:58},
+      {name:'NeuronWriter', url:'https://www.neuronwriter.com', category:'SEO & Content Marketing', short:'SERP‑driven content.', pricing:'paid', tags:['seo','nlp'], popularity:48},
+      {name:'Frase', url:'https://www.frase.io', category:'SEO & Content Marketing', short:'Briefs & outlines.', pricing:'paid', tags:['seo','briefs'], popularity:47},
+
+      // === 14) Social Media & Creators ===
+      {name:'Buffer AI', url:'https://buffer.com', category:'Social Media & Creators', short:'Write & schedule posts.', pricing:'both', tags:['social','scheduler'], popularity:52},
+      {name:'Hootsuite OwlyWriter', url:'https://www.hootsuite.com', category:'Social Media & Creators', short:'AI captions & ideas.', pricing:'paid', tags:['social','captions'], popularity:49},
+      {name:'Later AI', url:'https://later.com', category:'Social Media & Creators', short:'Planning + AI help.', pricing:'paid', tags:['social','planner'], popularity:42},
+      {name:'OpusClip', url:'https://www.opus.pro', category:'Social Media & Creators', short:'Auto shorts from long video.', pricing:'both', tags:['video','clips'], popularity:55},
+      {name:'Captions', url:'https://www.captions.ai', category:'Social Media & Creators', short:'Creator video studio.', pricing:'both', tags:['video','captions'], popularity:53},
+
+      // === 15) Customer Support & CX ===
+      {name:'Intercom Fin', url:'https://www.intercom.com/ai', category:'Customer Support & CX', short:'Agent + help center AI.', pricing:'paid', tags:['support','chatbot'], popularity:61},
+      {name:'Zendesk AI', url:'https://www.zendesk.com', category:'Customer Support & CX', short:'Agent assist & macros.', pricing:'paid', tags:['support','helpdesk'], popularity:57},
+      {name:'Ada', url:'https://www.ada.cx', category:'Customer Support & CX', short:'Automate customer service.', pricing:'paid', tags:['support','automation'], popularity:46},
+      {name:'Forethought', url:'https://forethought.ai', category:'Customer Support & CX', short:'GenAI for ticketing.', pricing:'paid', tags:['support','tickets'], popularity:44},
+      {name:'Freshworks Freddy', url:'https://www.freshworks.com', category:'Customer Support & CX', short:'AI across Freshdesk.', pricing:'paid', tags:['support','crm'], popularity:43},
+
+      // === 16) E‑commerce & Product ===
+      {name:'Clerk.io', url:'https://www.clerk.io', category:'E‑commerce & Product', short:'Personalization & search.', pricing:'paid', tags:['ecom','search'], popularity:45},
+      {name:'Algolia Neural', url:'https://www.algolia.com', category:'E‑commerce & Product', short:'Search & recommendations.', pricing:'paid', tags:['search','api'], popularity:58},
+      {name:'Constructor', url:'https://constructor.io', category:'E‑commerce & Product', short:'Commerce search & merch.', pricing:'paid', tags:['ecom','ranking'], popularity:40},
+      {name:'Octane AI', url:'https://www.octaneai.com', category:'E‑commerce & Product', short:'Quiz + personalization.', pricing:'paid', tags:['quiz','shopify'], popularity:39},
+      {name:'Shopify Magic (Store)', url:'https://www.shopify.com', category:'E‑commerce & Product', short:'Product & email copy.', pricing:'paid', tags:['shopify','copy'], popularity:60},
+
+      // === 17) Education & Study ===
+      {name:'Khanmigo', url:'https://www.khanacademy.org', category:'Education & Study', short:'Tutor integrated in Khan.', pricing:'both', tags:['study','tutor'], popularity:62},
+      {name:'Quizlet Q‑Chat', url:'https://quizlet.com', category:'Education & Study', short:'Practice with AI.', pricing:'both', tags:['flashcards','study'], popularity:56},
+      {name:'Duolingo Max', url:'https://www.duolingo.com', category:'Education & Study', short:'AI roleplay for languages.', pricing:'paid', tags:['language','practice'], popularity:59},
+      {name:'Perplexity (Edu)', url:'https://www.perplexity.ai', category:'Education & Study', short:'Research with sources.', pricing:'both', tags:['research','answers'], popularity:60},
+      {name:'ScribeHow', url:'https://scribehow.com', category:'Education & Study', short:'Auto step‑by‑step guides.', pricing:'both', tags:['how-to','docs'], popularity:47},
+
+      // === 18) Translation & Localization ===
+      {name:'DeepL', url:'https://www.deepl.com', category:'Translation & Localization', short:'High‑quality translation.', pricing:'both', tags:['translate','writing'], popularity:76},
+      {name:'Google Translate', url:'https://translate.google.com', category:'Translation & Localization', short:'Ubiquitous translator.', pricing:'free', tags:['translate','mobile'], popularity:88},
+      {name:'Lokalise AI', url:'https://lokalise.com', category:'Translation & Localization', short:'Localization workflows.', pricing:'paid', tags:['l10n','product'], popularity:45},
+      {name:'Phrase', url:'https://phrase.com', category:'Translation & Localization', short:'String management + AI.', pricing:'paid', tags:['l10n','strings'], popularity:44},
+      {name:'Smartling', url:'https://www.smartling.com', category:'Translation & Localization', short:'Enterprise localization.', pricing:'paid', tags:['l10n','enterprise'], popularity:46},
+
+      // === 19) 3D, Design & Creative ===
+      {name:'Kaedim', url:'https://www.kaedim3d.com', category:'3D, Design & Creative', short:'2D → 3D assets.', pricing:'paid', tags:['3d','assets'], popularity:50},
+      {name:'Luma AI', url:'https://lumalabs.ai', category:'3D, Design & Creative', short:'Capture & generate 3D.', pricing:'both', tags:['3d','capture'], popularity:63},
+      {name:'Blender + AI', url:'https://www.blender.org', category:'3D, Design & Creative', short:'Open 3D suite + add‑ons.', pricing:'free', tags:['3d','open-source'], popularity:70},
+      {name:'Runway (VFX)', url:'https://runwayml.com', category:'3D, Design & Creative', short:'Gen effects for creatives.', pricing:'paid', tags:['vfx','video'], popularity:64},
+      {name:'Adobe Firefly', url:'https://www.adobe.com/products/firefly.html', category:'3D, Design & Creative', short:'Creative gen tools.', pricing:'paid', tags:['design','image'], popularity:71},
+
+      // === 20) No‑Code Agents & Agent Builders ===
+      {name:'OpenAI GPTs', url:'https://chat.openai.com/gpts', category:'No‑Code Agents & Agent Builders', short:'Build mini agents easily.', pricing:'both', tags:['agents','no-code'], popularity:78},
+      {name:'Lindy', url:'https://www.lindy.ai', category:'No‑Code Agents & Agent Builders', short:'Personal productivity agents.', pricing:'paid', tags:['agents','work'], popularity:52},
+      {name:'SmythOS', url:'https://www.smythos.com', category:'No‑Code Agents & Agent Builders', short:'Enterprise workflows & agents.', pricing:'paid', tags:['agents','workflow'], popularity:49},
+      {name:'Gooey.AI', url:'https://gooey.ai', category:'No‑Code Agents & Agent Builders', short:'Pipelines & templates.', pricing:'both', tags:['agents','pipelines'], popularity:46},
+      {name:'AgentGPT', url:'https://agentgpt.reworkd.ai', category:'No‑Code Agents & Agent Builders', short:'Experiment with autonomous loops.', pricing:'free', tags:['agents','prototype'], popularity:41},
+    ];
+
+    // --- Derive categories from data ---
+    const categories = [...new Set(seedData.map(t => t.category))].sort();
+
+    // --- UI state ---
+    const state = {
+      q: '',
+      selectedCategories: new Set(),
+      pricing: 'any',
+      sort: 'pop-desc',
+      showFaves: false,
+      faves: new Set(JSON.parse(localStorage.getItem('top-ai-tool:faves')||'[]')),
+    };
+
+    // --- Elements ---
+    const grid = document.getElementById('grid');
+    const count = document.getElementById('count');
+    const qInput = document.getElementById('q');
+    const sortSelect = document.getElementById('sort');
+    const pricingSelect = document.getElementById('pricing');
+
+    // Category chips
+    const chipsWrap = document.getElementById('category-chips');
+    categories.forEach(cat=>{
+      const id = 'c_' + cat.replace(/[^a-z0-9]/gi,'_');
+      const chip = document.createElement('label');
+      chip.className = 'chip';
+      chip.innerHTML = `<input type="checkbox" id="${id}"> <span>${cat}</span>`;
+      chipsWrap.appendChild(chip);
+      chip.querySelector('input').addEventListener('change', (e)=>{
+        if(e.target.checked) state.selectedCategories.add(cat); else state.selectedCategories.delete(cat);
+        render();
+      });
+    });
+
+    // --- Helpers ---
+    const norm = s => (s||'').toLowerCase();
+    const matchesQuery = (tool, q) => {
+      if(!q) return true;
+      const hay = `${tool.name} ${tool.short} ${tool.category} ${tool.tags.join(' ')}`.toLowerCase();
+      return q.split(/\s+/).every(w => hay.includes(w));
+    };
+
+    function filtered(){
+      return seedData.filter(tool=>{
+        if(state.showFaves && !state.faves.has(tool.name)) return false;
+        if(state.selectedCategories.size && !state.selectedCategories.has(tool.category)) return false;
+        if(state.pricing !== 'any'){
+          if(state.pricing==='free' && !(tool.pricing==='free' || tool.pricing==='both')) return false;
+          if(state.pricing==='paid' && !(tool.pricing==='paid' || tool.pricing==='both')) return false;
+        }
+        if(!matchesQuery(tool, norm(state.q))) return false;
+        return true;
+      }).sort((a,b)=>{
+        switch(state.sort){
+          case 'name-asc': return a.name.localeCompare(b.name);
+          case 'name-desc': return b.name.localeCompare(a.name);
+          default: return (b.popularity||0) - (a.popularity||0);
+        }
+      });
+    }
+
+    function card(tool){
+      const saved = state.faves.has(tool.name);
+      const el = document.createElement('article');
+      el.className = 'card';
+      el.innerHTML = `
+        <h3>${tool.name}</h3>
+        <div class="meta">
+          <span>${tool.category}</span>
+          <span>•</span>
+          <span>${tool.pricing==='both' ? 'Free tier & Paid' : tool.pricing==='free' ? 'Free' : 'Paid'}</span>
+        </div>
+        <p>${tool.short}</p>
+        <div class="tags">${tool.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+        <div class="actions">
+          <a class="pill primary" href="${tool.url}" target="_blank" rel="noopener">Visit</a>
+          <button class="pill" aria-pressed="${saved}" data-fave>★ ${saved? 'Saved':'Save'}</button>
+        </div>
+      `;
+      el.querySelector('[data-fave]').addEventListener('click', ()=>{
+        if(state.faves.has(tool.name)) state.faves.delete(tool.name); else state.faves.add(tool.name);
+        localStorage.setItem('top-ai-tool:faves', JSON.stringify([...state.faves]));
+        render();
+      });
+      return el;
+    }
+
+    function render(){
+      const list = filtered();
+      count.textContent = `${list.length} tools shown` + (state.showFaves? ' — favorites only':'' );
+      grid.innerHTML = '';
+      list.forEach(t=> grid.appendChild(card(t)));
+    }
+
+    // --- Events ---
+    qInput.addEventListener('input', (e)=>{ state.q = e.target.value; render(); });
+    document.addEventListener('keydown', (e)=>{ if(e.key === '/' && document.activeElement !== qInput){ e.preventDefault(); qInput.focus(); } });
+    sortSelect.addEventListener('change', (e)=>{ state.sort = e.target.value; render(); });
+    pricingSelect.addEventListener('change', (e)=>{ state.pricing = e.target.value; render(); });
+    document.getElementById('clear').addEventListener('click', ()=>{
+      state.q=''; qInput.value=''; state.selectedCategories.clear();
+      chipsWrap.querySelectorAll('input').forEach(i=> i.checked=false);
+      state.pricing='any'; pricingSelect.value='any'; state.sort='pop-desc'; sortSelect.value='pop-desc';
+      state.showFaves=false; document.getElementById('show-faves').classList.remove('active');
+      render();
+    });
+
+    document.getElementById('show-faves').addEventListener('click', (e)=>{
+      e.preventDefault(); state.showFaves = !state.showFaves; render();
+      e.target.classList.toggle('active');
+    });
+
+    // Initial paint
+    render();
+  </script>
+</body>
+</html>
 
